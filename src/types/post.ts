@@ -6,6 +6,7 @@ export type PostMeta = {
 }
 
 export type Post = {
-    metadata: PostMeta
-    content: string
-}
+    code: string;
+    frontmatter: PostMeta;
+    id: string;
+  };
