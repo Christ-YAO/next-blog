@@ -1,11 +1,13 @@
 import path from "path";
 import fs from "fs";
-import { PostMeta } from "../types/post";
+import { Post, PostMeta } from "../types/post";
 import matter from "gray-matter";
+import { bundleMDX } from "mdx-bundler";
+import rehypePrism from "rehype-prism-plus";
 
 const postDirectory = path.join(process.cwd(), "content");
 
-export const getSortedPostsData = () => {
+export const getSortedPostsData = (): PostMeta[] => {
   // Get file names under /posts
   const fileNames = fs
     .readdirSync(postDirectory)
@@ -30,4 +32,41 @@ export const getSortedPostsData = () => {
   });
 
   return allPostsData;
+};
+
+export type PostSlugParams = {
+  params: {
+    slug: string;
+  };
+};
+
+export const getPostsSlugs = (): PostSlugParams[] => {
+  return getSortedPostsData().map((post) => {
+    return {
+      params: {
+        slug: post.id,
+      },
+    };
+  });
+};
+
+export const getPostBySlug = async (slug: string): Promise<Post> => {
+  const fullPath = path.join(postDirectory, `${slug}.mdx`);
+  const fileContents = fs.readFileSync(fullPath, "utf8");
+
+  const { code, frontmatter } = await bundleMDX({
+    source: fileContents,
+    mdxOptions(options) {
+      options.remarkPlugins = [...(options.remarkPlugins ?? [])];
+      options.rehypePlugins = [...(options.rehypePlugins ?? []), rehypePrism];
+
+      return options;
+    },
+  });
+
+  return {
+    id: slug,
+    code,
+    frontmatter: frontmatter as PostMeta,
+  };
 };
