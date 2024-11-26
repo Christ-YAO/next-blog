@@ -3,7 +3,6 @@ import fs from "fs";
 import { Post, PostMeta } from "../types/post";
 import matter from "gray-matter";
 import { bundleMDX } from "mdx-bundler";
-import rehypePrism from "rehype-prism-plus";
 
 const postDirectory = path.join(process.cwd(), "content");
 
@@ -58,7 +57,7 @@ export const getPostBySlug = async (slug: string): Promise<Post> => {
     source: fileContents,
     mdxOptions(options) {
       options.remarkPlugins = [...(options.remarkPlugins ?? [])];
-      options.rehypePlugins = [...(options.rehypePlugins ?? []), rehypePrism];
+      options.rehypePlugins = [...(options.rehypePlugins ?? [])];
 
       return options;
     },
